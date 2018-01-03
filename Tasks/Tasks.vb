@@ -23,15 +23,16 @@ Public Module Tasks
     End Function
 
     Public Function Register(trigger As IBackgroundTrigger, taskString As String, entryPoint As String) As IAsyncOperation(Of BackgroundTaskRegistration)
-        Return AsyncInfo.Run(Of BackgroundTaskRegistration)(
+        Return AsyncInfo.Run(
             Async Function(cancel) As Task(Of BackgroundTaskRegistration)
                 ' Register new background task
                 Dim backgroundAccessStatus = Await BackgroundExecutionManager.RequestAccessAsync()
                 Select Case backgroundAccessStatus
                     Case BackgroundAccessStatus.AllowedSubjectToSystemPolicy, BackgroundAccessStatus.AlwaysAllowed
-                        Dim taskBuilder As New BackgroundTaskBuilder()
-                        taskBuilder.Name = taskString
-                        taskBuilder.TaskEntryPoint = entryPoint
+                        Dim taskBuilder As New BackgroundTaskBuilder With {
+                            .Name = taskString,
+                            .TaskEntryPoint = entryPoint
+                        }
                         taskBuilder.SetTrigger(trigger)
                         Return taskBuilder.Register()
                 End Select
